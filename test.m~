@@ -1,0 +1,25 @@
+(open Nigui)
+
+(define window (newWindow "Making Gui in M!" 400 400))
+
+(define mainContainer (newLayoutContainer 'Horizontal))
+  (xAlign= mainContainer 'Center)
+  (define label (newLabel "Hello From M!"))
+  (fontFamily= label "iosevka")
+  (fontSize= label 24.0)
+  (addChild mainContainer label)
+
+(define buttonContainer (newLayoutContainer 'Horizontal))
+  (xAlign= buttonContainer 'Center)
+  (define button (newButton "Click Me!"))
+  (fontSize= button 18.0)
+  (addChild buttonContainer button)
+
+
+(addChild mainContainer buttonContainer)
+(addChild window mainContainer)
+
+
+(show window)
+
+
