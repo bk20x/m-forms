@@ -464,6 +464,27 @@ proc yAlignEq(args: LispObject): LispObject =
   return args.first  
 ## End Polymorphic builtins
 
+proc openFileDialog(args: LispObject): LispObject =
+  if args.len != 1 or not (args.first.kind == String):
+    err(fmt"`openFileDialog` is of type String -> String but got {args}")
+  result = newStr("")
+  let title = args.first.str
+  var dialog = newOpenFileDialog()
+  dialog.title = title
+  dialog.run()
+  if dialog.files.len >= 1:
+    result.str = dialog.files[0]
+
+  
+proc saveFileDialog(args: LispObject): LispObject =
+  if args.len != 1 or not (args.first.kind == String):
+    err(fmt"`saveFileDialog` is of type String -> String but got {args}")
+  let title = args.first.str
+  var dialog = newSaveFileDialog()
+  dialog.title = title
+  dialog.run()
+  result = newStr(dialog.file)
+  
 proc initGui(args: LispObject): LispObject =
   result = NIL()
   init app
@@ -492,7 +513,9 @@ const Module = toTable {
   "xAlign="           : BuiltinFn xAlignEq,
   "yAlign="           : BuiltinFn yAlignEq,
   "fontFamily="       : BuiltinFn fontFamilyEq,
-  "fontSize="         : BuiltinFn fontSizeEq
+  "fontSize="         : BuiltinFn fontSizeEq,
+  "openFileDialog"    : BuiltinFn openFileDialog,
+  "saveFileDialog"    : BuiltinFn saveFileDialog
 }
 
 interp.registerModule("Nigui", Module)

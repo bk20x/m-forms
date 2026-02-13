@@ -1,6 +1,4 @@
 (load "gui.m")
-(initialize-gui)
-
 
 (define window (Window "Making Gui in M!" 400 400))
 
@@ -26,7 +24,7 @@
    [
      (button! "Click Me!"
       {
-        onClick: (-> () (echo "Ive been Clicked!"))
+        onClick: (-> () (echo (openFileDialog "Select files")))
       }
      )
    ]
