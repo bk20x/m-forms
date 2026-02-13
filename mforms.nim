@@ -24,9 +24,6 @@ type
 template isWindow(obj: LispObject): bool =
   (obj.kind == AlienObj and obj.alien.tname == "Window")
 
-template isGuiElement(obj: LispObject): bool =
-  (obj.kind == AlienObj and (obj.alien.tname in ParentElems or obj.alien.tname in ChildElems))
-
 proc newWindowObj(window: Window): WindowObj =
   return WindowObj(tname: "Window", win: window)
     
@@ -182,7 +179,7 @@ proc onKeyDownEq(args: LispObject): LispObject =
     eventTable.table[newSym("key")]       = newSym($event.key)
     eventTable.table[newSym("character")] = newStr(event.character)
     eventTable.table[newSym("unicode")]   = newInt(event.unicode)
-    eventTable.table[newSym("downKeys")]  = lispobject.newSeq(downKeys().map(key => (newStr $key)))
+    eventTable.table[newSym("downKeys")]  = lispobject.newSeq(downKeys().map(key => (newSym $key)))
     eventTable.table[handled] = NIL()
     discard interp.apply(fun, @[eventTable])
     if eventTable.table[handled].isT:
@@ -283,7 +280,48 @@ proc getText(args: LispObject): LispObject =
     return newStr(textArea.text)
   else:
     discard
+    
+proc getFontFamily(args: LispObject): LispObject =
+  if args.len != 1 or not (args.first.kind        == AlienObj      and 
+                           args.first.alien.tname in ElemsWithText):
+    err(fmt"`fontFamily@` is of type Control -> String but got {args}")
+  let  elem = args.first.alien
+  case elem.tname
+  of "Button":
+    var button = ButtonObj(elem).button
+    return newStr(button.fontFamily)
+  of "Label":
+    var label = LabelObj(elem).label
+    return newStr(label.fontFamily)
+  of "TextBox":
+    var textBox = TextBoxObj(elem).textBox
+    return newStr(textBox.fontFamily)
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    return newStr(textArea.fontFamily)
+  else:
+    discard
 
+proc getFontSize(args: LispObject): LispObject =
+  if args.len != 1 or not (args.first.kind        == AlienObj      and 
+                           args.first.alien.tname in ElemsWithText):
+    err(fmt"`fontSize@` is of type Control -> Float but got {args}")
+  let  elem = args.first.alien
+  case elem.tname
+  of "Button":
+    var button = ButtonObj(elem).button
+    return newFloat(button.fontSize)
+  of "Label":
+    var label = LabelObj(elem).label
+    return newFloat(label.fontSize)
+  of "TextBox":
+    var textBox = TextBoxObj(elem).textBox
+    return newFloat(textBox.fontSize)
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    return newFloat(textArea.fontSize)
+  else:
+    discard
 
 proc widthModeEq(args: LispObject): LispObject =
   if args.len != 2 or not (args.first.kind == AlienObj and
@@ -513,7 +551,9 @@ const Module = toTable {
   "xAlign="           : BuiltinFn xAlignEq,
   "yAlign="           : BuiltinFn yAlignEq,
   "fontFamily="       : BuiltinFn fontFamilyEq,
+  "fontFamily@"       : BuiltinFn getFontFamily,
   "fontSize="         : BuiltinFn fontSizeEq,
+  "fontSize@"         : BuiltinFn getFontSize,
   "openFileDialog"    : BuiltinFn openFileDialog,
   "saveFileDialog"    : BuiltinFn saveFileDialog
 }
