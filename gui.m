@@ -1,0 +1,22 @@
+(open Nigui)
+
+(macro button! (text attrs)
+ `(let ((result (Button ,text))
+        (attrs ,attrs))
+   (if attrs.onClick    (onClick=    result attrs.onClick))
+   (if attrs.widthMode  (widthMode=  result attrs.widthMode))
+   (if attrs.heightMode (heightMode= result attrs.heightMode))
+   result))
+
+
+(macro layout! (kind attrs elems)
+ `(let ((result (LayoutContainer ',kind))
+        (attrs ,attrs)
+	(elems ,elems))
+   (if attrs.xAlign     (xAlign= result attrs.xAlign))
+   (if attrs.yAlign     (yAlign= result attrs.yAlign))
+   (if attrs.widthMode  (widthMode=  result attrs.widthMode))
+   (if attrs.heightMode (heightMode= result attrs.heightMode))
+    (each (elem elems)
+      (addChild result elem))
+   result))

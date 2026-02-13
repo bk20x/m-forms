@@ -1,34 +1,92 @@
-(open Nigui)
+(load "gui.m")
+(initialize-gui)
+
 
 (define window (Window "Making Gui in M!" 400 400))
 
-(define mainContainer (LayoutContainer 'Vertical))
-  (widthMode= mainContainer 'Expand)
 
-(define labelContainer (LayoutContainer 'Horizontal))
-  (xAlign= labelContainer 'Center)
-  (widthMode= labelContainer 'Expand)
+(define label (Label "Hello from M!"))
+(fontSize= label 24.0)
 
-  (define label (Label "Hello from M!"))
-  (fontSize= label 24.0)
-  (addChild labelContainer label)
-  (addChild labelContainer (TextBox ""))
-
-
-(define buttonContainer (LayoutContainer 'Horizontal))
-  (xAlign= buttonContainer 'Center)
-  (widthMode= buttonContainer 'Expand)
-  (heightMode= buttonContainer 'Expand)
-
-  (define button (Button "Click Me!"))
-  (onClick= button (-> () (echo "Ive been Clicked!")))
-  (addChild buttonContainer button)
+(define labelContainer
+ (layout! Horizontal
+   {widthMode: 'Expand, xAlign: 'Center}
+   [label]
+ )
+)
 
 
-(addChild mainContainer labelContainer)
-(addChild mainContainer buttonContainer)
+(define buttonContainer
+ (layout! Horizontal
+   {
+     widthMode:  'Expand,
+     heightMode: 'Expand,
+     xAlign:     'Center
+   }
+   [
+     (button! "Click Me!"
+      {
+        onClick: (-> () (echo "Ive been Clicked!"))
+      }
+     )
+   ]
+  )
+)
+
+
+(define mainContainer
+ (layout! Vertical
+   {widthMode: 'Expand}
+   [labelContainer, buttonContainer]
+ )
+)
+
+  
+
 (addChild window mainContainer)
 
 (show window)
+(display-gui)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

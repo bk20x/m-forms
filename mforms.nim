@@ -14,7 +14,7 @@ template isContainer(obj: LispObject): bool =
   (obj.kind == AlienObj and (obj.alien.tname == "LayoutContainer" or obj.alien.tname == "Container"))
 
 var interp = newEnv() ## because we will use lambdas as callbacks and these need access to global builtins
-app.init() ## initialize nigui
+
 
 ## Window
 type
@@ -149,6 +149,23 @@ proc setOnTextChange(args: LispObject): LispObject =
 
 ## End TextBox
 
+
+## TextArea
+type
+  TextAreaObj = ref object of Alien
+    textArea: TextArea
+
+proc newTextAreaObj(textArea: TextArea): TextAreaObj =
+  return TextAreaObj(tname: "TextArea", textArea: textArea)
+
+proc makeTextArea(args: LispObject): LispObject =
+  if args.len != 1 or not (args.first.kind == String):
+    err(fmt"`TextArea` is of type String -> TextArea but got {args}")
+  let text = args.first.str
+  return newAlien(newTextAreaObj(newTextArea(text)))
+
+## End TextArea
+  
 ## Keyboard stuff
 proc onKeyDownEq(args: LispObject): LispObject =
   if args.len != 2 or not (args.first.kind == AlienObj and (args.first.alien.tname == "Window" or args.first.alien.tname in ChildElems)):
@@ -177,9 +194,9 @@ proc onKeyDownEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.onKeyDown = onKeyDown
-  of "Button":
-    var button = ButtonObj(elem).button
-    button.onKeyDown = onKeyDown
+  of "TextArea":
+    var textArea = TextAreaObJ(elem).textArea
+    textArea.onKeyDown = onKeyDown
   else:
     discard
   return args.first
@@ -205,6 +222,8 @@ proc addChild(args: LispObject): LispObject =
         parent.add(LabelObj(child).label)
       of "TextBox":
         parent.add(TextBoxObj(child).textBox)
+      of "TextArea":
+        parent.add(TextAreaObj(child).textArea)
       else:
         discard
     case parent.tname
@@ -236,6 +255,9 @@ proc textEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.text = text
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    textArea.text = text
   else:
     discard
   return args.first
@@ -256,6 +278,9 @@ proc getText(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     return newStr(textBox.text)
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    return newStr(textArea.text)
   else:
     discard
 
@@ -286,6 +311,9 @@ proc widthModeEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.setAux(mode)
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    textArea.setAux(mode)
   of "LayoutContainer":
     var cont = LayoutContainerObj(elem).container
     cont.setAux(mode)
@@ -320,6 +348,9 @@ proc heightModeEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.setAux(mode)
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    textArea.setAux(mode)
   of "LayoutContainer":
     var cont = LayoutContainerObj(elem).container
     cont.setAux(mode)
@@ -345,6 +376,9 @@ proc fontFamilyEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.fontFamily = font
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    textArea.fontFamily = font
   else:
     discard
   return args.first
@@ -368,6 +402,9 @@ proc fontSizeEq(args: LispObject): LispObject =
   of "TextBox":
     var textBox = TextBoxObj(elem).textBox
     textBox.fontSize = size
+  of "TextArea":
+    var textArea = TextAreaObj(elem).textArea
+    textArea.fontSize = size
   else:
     discard
   return args.first
@@ -427,7 +464,16 @@ proc yAlignEq(args: LispObject): LispObject =
   return args.first  
 ## End Polymorphic builtins
 
+proc initGui(args: LispObject): LispObject =
+  result = NIL()
+  init app
+proc displayGui(args: LispObject): LispObject =
+  result = NIL()
+  run app
+
 const Module = toTable {
+  "initialize-gui"    : BuiltinFn initGui,
+  "display-gui"       : BuiltinFn displayGui,
   "addChild"          : BuiltinFn addChild,
   "Window"            : BuiltinFn makeWindow,
   "show"              : BuiltinFn showWindow,
@@ -437,6 +483,7 @@ const Module = toTable {
   "onKeyDown="        : BuiltinFn onKeyDownEq,
   "Label"             : BuiltinFn makeLabel,
   "TextBox"           : BuiltinFn makeTextBox,
+  "TextArea"          : BuiltinFn makeTextArea,
   "onTextChange="     : BuiltinFn setOnTextChange,
   "text="             : BuiltinFn textEq,
   "text@"             : BuiltinFn getText,
@@ -446,11 +493,8 @@ const Module = toTable {
   "yAlign="           : BuiltinFn yAlignEq,
   "fontFamily="       : BuiltinFn fontFamilyEq,
   "fontSize="         : BuiltinFn fontSizeEq
-
 }
 
 interp.registerModule("Nigui", Module)
 Mmain(interp)
-
-app.run()
 
