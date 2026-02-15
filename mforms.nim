@@ -91,10 +91,16 @@ proc setOnClick(args: LispObject): LispObject =
   let
     button = ButtonObj(args.first.alien).button
     fun    = args.second
-  button.onClick = proc(event: ClickEvent) = (
-    block:
-      discard interp.apply(fun, @[])
-  )
+  if fun.params.len == 1:
+    button.onClick = proc(event: ClickEvent) = (
+      block:
+        discard interp.apply(fun, @[args.first])
+    )
+  else:
+    button.onClick = proc(event: ClickEvent) = (
+      block:
+        discard interp.apply(fun, @[])
+    )
   return args.first
 
 ## End Button

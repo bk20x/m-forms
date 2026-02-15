@@ -1,5 +1,5 @@
 (load "gui.m")
-(open SysIo)
+(open SysIo Seq Strings)
 
 (define window (Window "notepad" 800 600))
 (define textArea (TextArea ""))
@@ -36,6 +36,10 @@
    {widthMode: 'Expand}
    [optionsContainer, textContainer]))
 
+(if (safe (if (>= (length ~args) 2)
+ (text= textArea (readFile ~args[1])))).success
+ ()
+ (echo (fmt"Couldn't open file $" ~args[1])))
 
 (addChild window mainContainer)
 (show window)

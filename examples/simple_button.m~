@@ -1,0 +1,20 @@
+(load "gui.m")
+
+(define window (Window "counter button" 400 400))
+
+(define x 0)
+
+(define buttonContainer 
+ (layout! Horizontal
+   {xAlign: 'Center, yAlign: 'Center}
+   [
+     (button! (image x)
+      {
+	onClick: (-> () (text= button (image (setf x (+ x 1)))))
+      }
+     )
+   ]))
+
+(addChild window buttonContainer)
+(show window)
+(display-gui)
